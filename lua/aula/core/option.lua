@@ -91,6 +91,26 @@ local function _prependFlagList(option, value)
     end
 end
 
+-- @param option string
+-- @param value string|boolean|number
+-- @param delimiter string
+local function _removeList(option, value, delimiter)
+    local optionValue = vim.api.nvim_get_option(option)
+    local optionList = vim.split(optionValue, delimiter)
+    for k,v in pairs(optionList) do
+        if optionList[k] == value then
+            table.remove(optionList, k)
+            break
+        end
+    end
+
+    local newValue = table.concat(optionList, delimiter)
+    local success = pcall(vim.api.nvim_set_option, option, value)
+    if not success then
+        error(_makeErrMsg(option, value))
+    end
+end
+
 -- @param optionFn function
 -- @param option string
 -- @param value string|boolean|number
@@ -196,6 +216,27 @@ function Option.prepend(option, value)
                 _prependCommaList(option, value)
             elseif optionInfo.flaglist then
                 _prependFlagList(option, value)
+            else
+                error(string.format('[Option] `%s` is not a commalist or a flaglist option', option))
+            end
+        end,
+        function(err)
+            vim.api.nvim_err_writeln(err)
+        end
+    )
+end
+
+-- @param option string
+-- @param value string|boolean|number
+function Option.remove(option, value)
+    xpcall(
+        function()
+            _validate(option, value)
+            local optionInfo = _getOptionInfo(option)
+            if optionInfo.commalist then
+                _removeList(option, value, ',')
+            elseif optionInfo.flaglist then
+                _removeList(option, value, '')
             else
                 error(string.format('[Option] `%s` is not a commalist or a flaglist option', option))
             end

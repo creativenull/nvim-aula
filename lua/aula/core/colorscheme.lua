@@ -1,5 +1,5 @@
-local option = requre('./core.option')
-local event = require('./core.event')
+local option = require 'aula.core.option'
+local event = require 'aula.core.event'
 local ColorScheme = {}
 
 local function _mergeDefaultOpts(opts)
@@ -15,12 +15,15 @@ local function _validate(opts)
 end
 
 -- @param opts table - { name, background }
-function ColorScheme.setup(opts)
+function ColorScheme.set(opts)
     xpcall(
         function()
             _validate(opts)
             opts = _mergeDefaultOpts(opts)
-            option.set('background', opts.background)
+            option.set({
+                termguicolors = true,
+                background = opts.background
+            })
             vim.cmd('colorscheme ' .. opts.name)
         end,
         function(err)
@@ -30,7 +33,7 @@ function ColorScheme.setup(opts)
 end
 
 -- @param fn function
-function ColorScheme.custom_highlights(fn)
+function ColorScheme.highlights(fn)
     event.add({ event = 'ColorScheme', cmd = fn })
 end
 
