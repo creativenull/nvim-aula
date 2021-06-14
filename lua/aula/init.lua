@@ -1,26 +1,35 @@
 local M = {}
 
 _G.aula = {
-    debug = false,
-    commands = {
-        set = {},
-        queue = {}
-    },
+  debug = false,
 
-    keymaps = {
-        set = {},
-        queue = {}
-    },
+  theme = {},
 
-    events = {
-        queue = {}
-    }
+  commands = {
+    set = {},
+    queue = {}
+  },
+
+  keymaps = {
+    set = {},
+    queue = {}
+  },
+
+  events = {
+    set = {},
+    queue = {}
+  },
+
+  package = {
+    plugin_deps = {},
+    plugins = {}
+  }
 }
 
-function M.run()
-    require 'aula.config'.start()
-    require 'aula.user'
-    require 'aula.config'.finish()
+function M.init()
+  require 'aula.config'.start()
+  require 'aula.user'
+  require 'aula.config'.finish()
 end
 
 return M

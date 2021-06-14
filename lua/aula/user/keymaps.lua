@@ -1,5 +1,7 @@
 local keymap = require 'aula.core.keymap'
 
+keymap.set_leader(' ')
+
 -- Unbind default bindings for arrow keys, trust me this is for your own good
 keymap.set('v', '<up>', '<nop>')
 keymap.set('v', '<down>', '<nop>')

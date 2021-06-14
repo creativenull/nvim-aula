@@ -1,14 +1,10 @@
-local colorscheme = require 'aula.core.colorscheme'
+local theme = require 'aula.core.theme'
 
-colorscheme.set {
-    name = 'slate'
-}
+theme.colorscheme('zephyr')
 
-colorscheme.highlights(function()
-    -- Custom highlights here
-    -- eg. vim.cmd('highlight Normal guibg=#888')
-    vim.cmd 'hi! Normal guibg=NONE'
-    vim.cmd 'hi! SignColumn guibg=NONE'
-    vim.cmd 'hi! LineNr guibg=NONE guifg=#aaaaaa'
-    vim.cmd 'hi! CursorLineNr guibg=NONE'
+theme.set_theme_highlights(function()
+  vim.cmd 'highlight! Normal guibg=NONE'
+  vim.cmd 'highlight! SignColumn guibg=NONE'
+  vim.cmd 'highlight! LineNr guibg=NONE guifg=#aaaaaa'
+  vim.cmd 'highlight! CursorLineNr guibg=NONE'
 end)

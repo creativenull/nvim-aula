@@ -1,6 +1,12 @@
 local command = require 'aula.core.command'
 
--- I can't release my shift key fast enough :')
+-- command.set('-nargs=* W', 'w')
+-- command.set('-nargs=* W', 'w')
+-- command.set('-nargs=* Wq', 'wq')
+-- command.set('-nargs=* Q', 'q')
+-- command.set('-nargs=* Qa', 'qa')
+-- command.set('-nargs=* QA', 'qa')
+
 command.set('W', 'w')
 command.set('W', 'w')
 command.set('Wq', 'wq')
