@@ -2,7 +2,8 @@ local pkg = require 'aula.core.package'
 local M = {}
 
 function M.init()
-  pkg.add('tpope/vim-surround')
+  pkg.add('glepnir/zephyr-nvim')
+  pkg.add('sainnhe/gruvbox-material')
 end
 
 return M
