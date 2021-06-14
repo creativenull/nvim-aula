@@ -1,114 +1,108 @@
 local err = require 'aula.core.error'
-local Command = {}
+local M = {}
 
-local function _makeCommand(name, cmd)
-    return string.format('command! %s %s', name, cmd)
+local function get_command_str(name, cmd)
+  return string.format('command! %s %s', name, cmd)
 end
 
-local function _makeCommandSetFn()
-    local lastitem = #_G.aula.commands.set + 1
-    return string.format('lua _G.aula.commands.set[%d].cb()', lastitem)
+local function make_command_set_fn()
+  local lastitem = #_G.aula.commands.set + 1
+  return string.format('lua _G.aula.commands.set[%d].cb()', lastitem)
 end
 
-local function _makeCommandQueueFn()
-    local lastitem = #_G.aula.commands.queue + 1
-    return string.format('lua _G.aula.commands.queue[%d].cb()', lastitem)
+local function make_command_queue_fn()
+  local lastitem = #_G.aula.commands.queue + 1
+  return string.format('lua _G.aula.commands.queue[%d].cb()', lastitem)
 end
 
-local function _validate(name, cmd)
-    assert(type(name) == 'string' and name ~= '', '[Command] 1st arg `name` cannot be empty string')
-    assert(
-        type(cmd) == 'string' or type(cmd) == 'function',
-        '[Command] 2nd arg `cmd` should be a string or function'
-    )
+local function validate(name, cmd)
+  assert(type(name) == 'string' and name ~= '', '[Aula Command] 1st arg `name` cannot be empty string')
+  assert(
+    type(cmd) == 'string' or type(cmd) == 'function',
+    '[Aula Command] 2nd arg `cmd` should be a string or function'
+  )
 end
 
 -- Add commands to the queue
 -- @param name string
 -- @param cmd string
-function Command.add(name, cmd)
-    local tryFn = function()
-        _validate(name, cmd)
+function M.add(name, cmd)
+  local try_fn = function()
+    validate(name, cmd)
 
-        local isFn = type(cmd) == 'function'
-        local isStr = type(cmd) == 'string'
-        local commandAdd = {}
-        if isFn then
-            commandAdd = {
-                name = name,
-                cb = cmd,
-                cmd = _makeCommand(name, _makeCommandQueueFn())
-            }
-        elseif isStr then
-            commandAdd = {
-                name = name,
-                cmd = _makeCommand(name, cmd)
-            }
-        end
-
-        if not vim.tbl_isempty(commandAdd) then
-            table.insert(_G.aula.commands.queue, commandAdd)
-        end
+    local is_fn = type(cmd) == 'function'
+    local is_str = type(cmd) == 'string'
+    local command_add = {}
+    if is_fn then
+      command_add = {
+        name = name,
+        cb = cmd,
+        cmd = get_command_str(name, make_command_queue_fn())
+      }
+    elseif is_str then
+      command_add = {
+        name = name,
+        cmd = get_command_str(name, cmd)
+      }
     end
 
-    err.handle(tryFn)
+    if not vim.tbl_isempty(command_add) then
+      table.insert(_G.aula.commands.queue, command_add)
+    end
+  end
+
+  err.handle(try_fn)
 end
 
 -- Set the command when called, different to add()
 -- where this will be added to the command list when added
 -- @param name string
 -- @param cmd string
-function Command.set(name, cmd)
-    local tryFn = function()
-        local success, results = pcall(_validate, name, cmd)
-        if not success then
-            vim.api.nvim_err_writeln(results)
-            return
-        end
+function M.set(name, cmd)
+  local try_fn = function()
+    validate(name, cmd)
 
-        local isFn = type(cmd) == 'function'
-        local isStr = type(cmd) == 'string'
-        local commandSet = {}
-        if isFn then
-            commandSet = {
-                name = name,
-                cb = cmd,
-                cmd = _makeCommand(name, _makeCommandSetFn())
-            }
-        elseif isFn then
-            commandSet = {
-                name = name,
-                cmd = _makeCommand(name, cmd)
-            }
-        end
-
-        if not vim.tbl_isempty(commandSet) then
-            table.insert(_G.aula.commands.set, commandSet)
-            vim.cmd(commandSet.cmd)
-        end
+    local command_set = {}
+    local is_fn = type(cmd) == 'function'
+    local is_str = type(cmd) == 'string'
+    if is_fn then
+      command_set = {
+        name = name,
+        cb = cmd,
+        cmd = get_command_str(name, make_command_set_fn())
+      }
+    elseif is_str then
+      command_set = {
+        name = name,
+        cmd = get_command_str(name, cmd)
+      }
     end
 
-    err.handle(tryFn)
+    if not vim.tbl_isempty(command_set) then
+      table.insert(_G.aula.commands.set, command_set)
+      vim.api.nvim_command(command_set.cmd)
+    end
+  end
+
+  err.handle(try_fn)
 end
 
 -- Register all commands stored in queue
 -- and empty the queue
-function Command.setup()
-    local tryFn = function()
-        local queue = _G.aula.commands.queue
-        if #queue == 0 then
-            return
-        end
-
-        for i = 1, #queue do
-            local cmd = table.remove(_G.aula.commands.queue)
-            vim.cmd(cmd)
-        end
-
-        _G.aula.commands.queue = {}
+function M.setup()
+  local try_fn = function()
+    local queue = _G.aula.commands.queue
+    if #queue == 0 then
+      return
     end
 
-    err.handle(tryFn)
+    for _,v in pairs(queue) do
+      local command = v.cmd
+      vim.api.nvim_command(command)
+    end
+  end
+
+  err.handle(try_fn)
 end
 
-return Command
+return M

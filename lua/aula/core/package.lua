@@ -1,205 +1,209 @@
-local queue = require 'aula.core.queue'
 local validation = require 'aula.core.validation'
 local err = require 'aula.core.error'
 local command = require 'aula.core.command'
-local dir = require 'aula.core.fs.dir'
+local fs_dir = require 'aula.core.fs.dir'
 local uv = vim.loop
-
-local pluginsDir = vim.env.HOME .. '/.config/nvim-aula/lua/aula/plugins'
-local localDir = vim.env.HOME .. '/.local/share/nvim-aula'
-local Package = {
-    config = {
-        pluginsDir = pluginsDir,
-        localDir = localDir,
-        manager = {
-            name = 'packager',
-            packname = 'vim-packager',
-            git = 'https://github.com/kristijanhusak/vim-packager.git',
-            opts = {
-                dir = localDir .. '/site/pack/packager'
-            }
-        }
-    },
-
-    queue = {
-        key = 'packages',
-        depsKey = 'packages_deps'
-    },
-
-    plugins = {}
+local plugins_dir = string.format('%s/.config/nvim-aula/lua/aula/plugins', vim.env.HOME)
+local local_dir = string.format('%s/.local/share/nvim-aula', vim.env.HOME)
+local M = {
+  config = {
+    plugins_dir = plugins_dir,
+    local_dir = local_dir,
+    manager = {
+      name = 'packager',
+      packname = 'vim-packager',
+      git = 'https://github.com/kristijanhusak/vim-packager.git',
+      opts = {
+        dir = local_dir .. '/site/pack/packager'
+      }
+    }
+  }
 }
 
-
+-- Get the plugin manager name to be used to
+-- maintain itself
 -- @returns string
-local function _getSelfPluginName()
-    local urlSplit = vim.split(Package.config.manager.git, '/')
+local function get_plugin_manager_name()
+  local datalist = vim.split(M.config.manager.git, '/')
 
-    -- Get "<username>/<repo>.git"
-    local gitName = table.concat(vim.list_slice(urlSplit, 4), '/')
+  -- Get "<username>/<repo>.git"
+  local git_repo = table.concat(vim.list_slice(datalist, 4), '/')
 
-    -- Get only "<username>/<repo>"
-    local packageName = vim.split(gitName, '.', true)[1]
-    return packageName
+  -- Get only "<username>/<repo>"
+  local plugin_name = vim.split(git_repo, '.', true)[1]
+  return plugin_name
 end
 
+-- Validate config options
 -- @param config table
-local function _validate(config)
-    if config == nil then
-        return
-    end
+local function validate(config)
+  if config == nil then
+    return
+  end
 
-    vim.validate {
-        pluginsDir = { config.pluginsDir, validation.typeOrNil('string', config.pluginsDir) },
-        sharedDir = { config.sharedDir, validation.typeOrNil('string', config.sharedDir) },
-        manager = { config.manager, validation.typeOrNil('table', config.manager) },
-        ['manager.name'] = { manager.name, validation.typeOrNil('string', config.manager.name) },
-        ['manager.packname'] = { manager.packname, validation.typeOrNil('string', config.manager.packname) },
-        ['manager.git'] = { manager.git, validation.typeOrNil('string', config.manager.git) },
-        ['manager.opts'] = { manager.opts, validation.typeOrNil('table', config.manager.opts) },
-    }
+  assert(validation.type_or_nil('string', config.plugins_dir), '[Aula Package] Invalid `plugins_dir`')
+  assert(validation.type_or_nil('string', config.shared_dir), '[Aula Package] Invalid `shared_dir`')
+  assert(validation.type_or_nil('string', config.manager), '[Aula Package] Invalid `manager`')
+  assert(validation.type_or_nil('string', config.manager.name), '[Aula Package] Invalid `manager.name`')
+  assert(validation.type_or_nil('string', config.manager.packname), '[Aula Package] Invalid `manager.packname`')
+  assert(validation.type_or_nil('string', config.manager.git), '[Aula Package] Invalid `manager.git`')
+  assert(validation.type_or_nil('string', config.manager.opts), '[Aula Package] Invalid `manager.opts`')
 end
 
-local function _validatePackage(name, opts)
-    vim.validate {
-        name = { name, 'string' },
-        opts = { opts, validation.typeOrNil('table', opts) }
-    }
+local function validate_pkg(name, opts)
+  assert(type(name) == 'string' and name ~= '', '[Aula Package] Cannot add empty plugin name')
+  assert(type(opts) == 'table' or opts == nil, '[Aula Package] Plugin opts must be table')
 end
 
+-- Get the install path of plugin manager
 -- @returns string
-local function _getInstallPath()
-    local config = Package.config
-    local path = string.format(
-        '%s/site/pack/%s/opt/%s',
-        config.localDir,
-        config.manager.name,
-        config.manager.packname
-    )
-    return path
+local function get_plugin_manager_installpath()
+  local config = M.config
+  local manager = config.manager
+  local path = string.format('%s/site/pack/%s/opt/%s', config.local_dir, manager.name, manager.packname)
+  return path
 end
 
-local function _notInstalled()
-    return vim.fn.isdirectory(_getInstallPath()) == 0
+-- Check if the plugin manager is installed
+-- @returns boolean
+local function is_plugin_manager_installed()
+  return vim.fn.isdirectory(get_plugin_manager_installpath()) > 0
 end
 
-local function _loadPlugins()
-    local manager = Package.config.manager
-    vim.cmd('packadd ' .. manager.packname)
+-- Load all the plugins listed in the config.plugins_dir directory
+local function load_plugins()
+  local manager = M.config.manager
+  vim.api.nvim_command('packadd ' .. manager.packname)
 
-    require 'packager'.setup(function(packager)
-        packager.add(_getSelfPluginName(), { type = 'opt' })
+  require 'packager'.setup(function(packager)
+    packager.add(get_plugin_manager_name(), { type = 'opt' })
 
-        -- Load dependencies
-        local deps = queue.get(Package.queue.depsKey)
-        for i = 1, #deps do
-            local depPlugin = queue.pop(Package.queue.depsKey)
-            if depPlugin.opts then
-                packager.add(depPlugin.name, depPlugin.opts)
-            else
-                packager.add(depPlugin.name)
-            end
-        end
-
-        -- Load plugins
-        local plugins = queue.get(Package.queue.key)
-        for i = 1, #plugins do
-            local plugin = queue.pop(Package.queue.key)
-            if plugin.opts then
-                packager.add(plugin.name, plugin.opts)
-            else
-                packager.add(plugin.name)
-            end
-        end
-
-        -- queue.clean(Package.queue.depsKey)
-        -- queue.clean(Package.queue.key)
-    end, manager.opts)
-end
-
-local function _forEachPluginCall(fn)
-    local config = Package.config
-    local modulepath = 'aula.plugins'
-    local pluginModules = dir.getFilesAsModules(config.pluginsDir, modulepath)
-
-    for _,module in pairs(pluginModules) do
-        local plugin = require(module)
-        if plugin.init == nil then
-            vim.api.nvim_err_writeln('[Package] Cannot setup `' .. plugin .. '` options without `init()`')
-        else
-            fn(plugin)
-        end
+    -- Load dependencies
+    local plugin_deps = _G.aula.package.plugin_deps
+    for _,plugin_dep in pairs(plugin_deps) do
+      if plugin_dep.opts then
+        packager.add(plugin_dep.name, plugin_dep.opts)
+      else
+        packager.add(plugin_dep.name)
+      end
     end
+
+    -- Load plugins
+    local plugins = _G.aula.package.plugins
+    for _,plugin in pairs(plugins) do
+      if plugin.opts then
+        packager.add(plugin.name, plugin.opts)
+      else
+        packager.add(plugin.name)
+      end
+    end
+  end, manager.opts)
 end
 
-local function _install()
-    local config = Package.config
-    local manager = config.manager
-    print('[Package] Installing a plugin manager')
-    vim.cmd(string.format('silent !git clone %s %s', manager.git, _getInstallPath()))
-    print('[Package] Done!')
+-- Run a function for each plugin loaded from the
+-- config.plugins_dir directory
+-- @param callback function
+local function for_each_plugin(callback)
+  local config = M.config
+  local modulepath = 'aula.plugins'
+  local plugins = fs_dir.get_files_as_modules(config.plugins_dir, modulepath)
+
+  for _,module in pairs(plugins) do
+    local success, plugin = pcall(require, module)
+    if not success or type(plugin) ~= 'table' then
+      vim.api.nvim_err_writeln(string.format('[Aula Package] `%s` not setup properly', module))
+    else
+      if plugin.init == nil then
+        vim.api.nvim_err_writeln(
+          string.format('[Aula Package] Cannot setup `%s` options without `init()`', module)
+        )
+      else
+        callback(plugin)
+      end
+    end
+  end
+end
+
+-- Install the plugin manager
+local function install_manager()
+  local config = M.config
+  local manager = config.manager
+  print('[Aula Package] Installing a plugin manager')
+  vim.api.nvim_command(string.format('silent !git clone %s %s', manager.git, get_install_path()))
+  print('[Aula Package] Done!')
+
+  -- Add the plugins and setup options before loading plugins
+  for_each_plugin(function(plugin)
+    plugin.init()
+  end)
+
+  -- Load the plugins and setup the plugin manager
+  load_plugins()
+  vim.api.nvim_command(':PackagerInstall')
+end
+
+-- Initialize the package module to setup plugins
+-- @param config table
+function M.init(config)
+  local try_fn = function()
+    if type(config) == 'table' and not vim.tbl_isempty(config) then
+      M.config = vim.tbl_extend('force', M.config, config)
+    end
+
+    validate(config)
+
+    if not is_plugin_manager_installed() then
+      install_manager()
+      return
+    end
 
     -- Add the plugins and setup options before loading plugins
-    _forEachPluginCall(function(plugin)
-        plugin.init()
+    for_each_plugin(function(plugin)
+      plugin.init()
+      if plugin.config ~= nil then
+        plugin.config()
+      end
     end)
 
     -- Load the plugins and setup the plugin manager
-    _loadPlugins()
-    vim.cmd(':PackagerInstall')
+    load_plugins()
+
+    -- Setup options after loading plugins
+    for_each_plugin(function(plugin)
+      if plugin.setup ~= nil then
+        plugin.setup()
+      end
+    end)
+  end
+
+  err.handle(try_fn)
 end
 
--- @param config table
-function Package.init(config)
-    local tryFn = function()
-        if type(config) == 'table' and not vim.tbl_isempty(config) then
-            Package.config = vim.tbl_extend('force', Package.config, config)
-        end
+-- Add a plugin dependency of a plugin
+-- @param name string
+-- @param opts table
+function M.add_dependency(name, opts)
+  local try_fn = function()
+    validate_pkg(name, opts)
+    table.insert(_G.aula.package.plugin_deps, { name = name, opts = opts })
+  end
 
-        _validate(config)
-
-        if _notInstalled() then
-            _install()
-            return
-        end
-
-        -- Add the plugins and setup options before loading plugins
-        _forEachPluginCall(function(plugin)
-            plugin.init()
-            if plugin.config ~= nil then
-                plugin.config()
-            end
-        end)
-
-        -- Load the plugins and setup the plugin manager
-        _loadPlugins()
-
-        -- Setup options after loading plugins
-        _forEachPluginCall(function(plugin)
-            if plugin.setup ~= nil then
-                plugin.setup()
-            end
-        end)
-    end
-
-    err.handle(tryFn)
+  err.handle(try_fn)
 end
 
-function Package.addDep(name, opts)
-    local tryFn = function()
-        _validatePackage(name, opts)
-        queue.push(Package.queue.depsKey, { name = name, opts = opts })
-    end
+-- Alias, so we type less
+M.add_dep = M.add_dependency
 
-    err.handle(tryFn)
+-- Add a plugin
+-- @param name string
+-- @param opts table
+function M.add(name, opts)
+  local try_fn = function()
+    validate_pkg(name, opts)
+    table.insert(_G.aula.package.plugins, { name = name, opts = opts })
+  end
+
+  err.handle(try_fn)
 end
 
-function Package.add(name, opts)
-    local tryFn = function()
-        _validatePackage(name, opts)
-        queue.push(Package.queue.key, { name = name, opts = opts })
-    end
-
-    err.handle(tryFn)
-end
-
-return Package
+return M

@@ -1,15 +1,15 @@
 local M = {}
 
-function M.typeOrNil(valueType, value)
-    return function()
-        return type(value) == valueType or type(value) == 'nil'
-    end
+function M.type_or_nil(value_type, value)
+  return function()
+    return type(value) == value_type or type(value) == 'nil'
+  end
 end
 
-function M.tableOrString(value)
-    return function()
-        return type(value) == 'table' or type(value) == 'string'
-    end
+function M.table_or_string(value)
+  return function()
+    return type(value) == 'table' or type(value) == 'string'
+  end
 end
 
 return M

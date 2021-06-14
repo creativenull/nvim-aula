@@ -1,18 +1,22 @@
+local command = require 'aula.core.command'
 local keymap = require 'aula.core.keymap'
-local Reload = {}
+local M = {}
 
-local function _reload()
-    for k, v in pairs(package.loaded) do
-        if string.match(k, '^aula') then
-            package.loaded[k] = nil
-        end
+local function reload()
+  for name,_ in pairs(package.loaded) do
+    if name:match('^aula') then
+      package.loaded[name] = nil
     end
+  end
 
-    dofile(vim.env.MYVIMRC)
+  dofile(vim.env.MYVIMRC)
+
+  print('[Aula] Config Reloaded!')
 end
 
-function Reload.setup()
-    keymap.add('n', '<leader>vs', _reload)
+function M.setup()
+  keymap.add('n', '<leader>vs', reload)
+  command.add('ConfigReload', reload)
 end
 
-return Reload
+return M
