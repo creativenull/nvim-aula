@@ -22,7 +22,7 @@ mistake.
 
 Aula solves this problem by making sure that the code you write doesn't affect your config in any way possible.
 Thereby, allowing you to make mistakes and then easily fix them without you experiencing your keymaps reset or
-colorscheme being set to default every time you hit an error while working on you config 🙂
+colorscheme being set to default every time you hit an error while working on your config 🙂
 
 ## Getting Started
 
