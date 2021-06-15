@@ -6,4 +6,3 @@ function M.init()
 end
 
 return M
-
