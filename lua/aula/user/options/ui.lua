@@ -1,6 +1,6 @@
-local option = require 'aula.core.option'
+local opt = require 'aula.core.option'
 
-option.set({
+opt.set({
   -- Line option
   showmatch = true,
 

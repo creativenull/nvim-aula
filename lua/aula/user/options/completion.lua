@@ -1,8 +1,7 @@
-local option = require 'aula.core.option'
+local opt = require 'aula.core.option'
 
-option.append('shortmess', 'c')
-
-option.set({
+opt.append('shortmess', 'c')
+opt.set({
   completeopt = 'menuone,noinsert,noselect',
-  updatetime = 100
+  updatetime = 250
 })

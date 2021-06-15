@@ -1,7 +1,5 @@
 local keymap = require 'aula.core.keymap'
 
-keymap.set_leader(' ')
-
 -- Unbind default bindings for arrow keys, trust me this is for your own good
 keymap.set('v', '<up>', '<nop>')
 keymap.set('v', '<down>', '<nop>')
@@ -18,9 +16,6 @@ keymap.set('i', 'jk', '<ESC>')
 -- Map escape from terminal input to Normal mode
 keymap.set('t', '<ESC>', [[<C-\><C-n>]])
 keymap.set('t', '<C-[>', [[<C-\><C-n>]])
-
--- File explorer
-keymap.set('n', '<F3>', '<cmd>Ex<CR>')
 
 -- Omnifunc
 keymap.set('i', '<C-Space>', '<C-x><C-o>')
@@ -53,6 +48,11 @@ keymap.set('n', '<M-j>', [[mz:m+<CR>`z]])
 keymap.set('n', '<M-k>', [[mz:m-2<CR>`z]])
 keymap.set('v', '<M-j>', [[:m'>+<CR>`<my`>mzgv`yo`z]])
 keymap.set('v', '<M-k>', [[:m'<-2<CR>`>my`<mzgv`yo`z]])
+
+-- Tab completion
+keymap.set('i', '<Tab>', [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { expr = true })
+keymap.set('i', '<S-Tab>', [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { expr = true })
+keymap.set('i', '<Enter>', [[pumvisible() ? "\<C-y>" : "\<Enter>"]], { expr = true })
 
 -- Reload file
 keymap.set('n', '<leader>r', '<cmd>edit!<CR>')

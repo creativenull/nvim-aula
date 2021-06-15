@@ -1,7 +1,7 @@
 local event = require 'aula.core.event'
-local option = require 'aula.core.option'
+local opt = require 'aula.core.option'
 
-option.set({
+opt.set({
   -- Search options
   hlsearch = true,
   incsearch = true,
@@ -44,8 +44,16 @@ event.add({
   cmd = 'setlocal spell'
 })
 
+-- 2 spacing for lua files
 event.add({
   event = 'FileType',
   pattern = 'lua',
   cmd = 'setlocal tabstop=2 softtabstop=2 shiftwidth=0'
+})
+
+event.add({
+  event = 'TextYankPost',
+  cmd = function()
+    vim.highlight.on_yank({ higroup = 'Search', timeout = 500 })
+  end
 })

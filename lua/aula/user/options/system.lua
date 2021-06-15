@@ -1,15 +1,14 @@
-local option = require 'aula.core.option'
+local opt = require 'aula.core.option'
+local undodir = vim.env.HOME .. '/.cache/nvim-aula/undodir'
 
-local undodir = vim.env.HOME .. '/.cache/nvim-nightly/undodir'
-
-option.set({
+opt.set({
   -- Move swapfiles and backups into cache
   swapfile = false,
   backup = false,
 
   -- Enable the integrated undo features
   undofile = true,
-  undodir = string.format('%s/.cache/nvim-nightly/undodir', vim.env.HOME),
+  undodir = undodir,
   undolevels = 10000,
   history = 10000,
 
@@ -17,5 +16,5 @@ option.set({
   lazyredraw = true,
 
   -- no mouse support
-  mouse = ''
+  mouse = 'a'
 })
