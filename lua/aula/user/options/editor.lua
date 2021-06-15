@@ -44,16 +44,16 @@ event.add({
   cmd = 'setlocal spell'
 })
 
--- 2 spacing for lua files
-event.add({
-  event = 'FileType',
-  pattern = 'lua',
-  cmd = 'setlocal tabstop=2 softtabstop=2 shiftwidth=0'
-})
-
+-- Show chars being highlighted
 event.add({
   event = 'TextYankPost',
   cmd = function()
     vim.highlight.on_yank({ higroup = 'Search', timeout = 500 })
   end
+})
+
+-- Trim trailing whitespace
+event.add({
+  event = 'BufWritePre',
+  cmd = [[%s/\s\+$//e]]
 })

@@ -17,29 +17,26 @@ keymap.set('i', 'jk', '<ESC>')
 keymap.set('t', '<ESC>', [[<C-\><C-n>]])
 keymap.set('t', '<C-[>', [[<C-\><C-n>]])
 
--- Omnifunc
-keymap.set('i', '<C-Space>', '<C-x><C-o>')
-
 -- Disable highlights
-keymap.set('n', '<leader><CR>', '<cmd>noh<CR>')
+keymap.set('n', '<leader><CR>', '<Cmd>noh<CR>')
 
 -- Buffer maps
 -- -----------
 -- List all buffers
-keymap.set('n', '<leader>bl', [[<cmd>buffers<CR>]])
+keymap.set('n', '<leader>bl', [[<Cmd>buffers<CR>]])
 -- Next buffer
-keymap.set('n', '<C-l>', '<cmd>bnext<CR>')
+keymap.set('n', '<C-l>', '<Cmd>bnext<CR>')
 -- Previous buffer
-keymap.set('n', '<C-h>', '<cmd>bprevious<CR>')
+keymap.set('n', '<C-h>', '<Cmd>bprevious<CR>')
 -- Close buffer, and more?
-keymap.set('n', '<leader>bd', '<cmd>bp<BAR>sp<BAR>bn<BAR>bd<CR>')
+keymap.set('n', '<leader>bd', '<Cmd>bp<BAR>sp<BAR>bn<BAR>bd<CR>')
 
 -- Resize window panes, we can use those arrow keys
 -- to help use resize windows - at least we give them some purpose
-keymap.set('n', '<up>', '<cmd>resize +2<CR>')
-keymap.set('n', '<down>', '<cmd>resize -2<CR>')
-keymap.set('n', '<left>', '<cmd>vertical resize -2<CR>')
-keymap.set('n', '<right>', '<cmd>vertical resize +2<CR>')
+keymap.set('n', '<up>', '<Cmd>resize +2<CR>')
+keymap.set('n', '<down>', '<Cmd>resize -2<CR>')
+keymap.set('n', '<left>', '<Cmd>vertical resize -2<CR>')
+keymap.set('n', '<right>', '<Cmd>vertical resize +2<CR>')
 
 -- Text maps
 -- ---------
@@ -49,10 +46,5 @@ keymap.set('n', '<M-k>', [[mz:m-2<CR>`z]])
 keymap.set('v', '<M-j>', [[:m'>+<CR>`<my`>mzgv`yo`z]])
 keymap.set('v', '<M-k>', [[:m'<-2<CR>`>my`<mzgv`yo`z]])
 
--- Tab completion
-keymap.set('i', '<Tab>', [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { expr = true })
-keymap.set('i', '<S-Tab>', [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { expr = true })
-keymap.set('i', '<Enter>', [[pumvisible() ? "\<C-y>" : "\<Enter>"]], { expr = true })
-
 -- Reload file
-keymap.set('n', '<leader>r', '<cmd>edit!<CR>')
+keymap.set('n', '<leader>r', '<Cmd>edit!<CR>')
