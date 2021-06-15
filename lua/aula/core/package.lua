@@ -2,12 +2,12 @@ local validation = require 'aula.core.validation'
 local err = require 'aula.core.error'
 local command = require 'aula.core.command'
 local fs_dir = require 'aula.core.fs.dir'
-local uv = vim.loop
-local plugins_dir = string.format('%s/.config/nvim-aula/lua/aula/plugins', vim.env.HOME)
+
+-- TODO:
+-- Replace this with stdpath('data')
 local local_dir = string.format('%s/.local/share/nvim-aula', vim.env.HOME)
 local M = {
   config = {
-    plugins_dir = plugins_dir,
     local_dir = local_dir,
     manager = {
       name = 'packager',
@@ -41,7 +41,7 @@ local function validate(config)
     return
   end
 
-  assert(validation.type_or_nil('string', config.plugins_dir), '[Aula Package] Invalid `plugins_dir`')
+  assert(validation.type_or_nil('string', _G.aula.config.plugins_dir), '[Aula Package] Invalid `plugins_dir`')
   assert(validation.type_or_nil('string', config.shared_dir), '[Aula Package] Invalid `shared_dir`')
   assert(validation.type_or_nil('string', config.manager), '[Aula Package] Invalid `manager`')
   assert(validation.type_or_nil('string', config.manager.name), '[Aula Package] Invalid `manager.name`')
@@ -106,7 +106,7 @@ end
 local function for_each_plugin(callback)
   local config = M.config
   local modulepath = 'aula.plugins'
-  local plugins = fs_dir.get_files_as_modules(config.plugins_dir, modulepath)
+  local plugins = fs_dir.get_files_as_modules(_G.aula.config.plugins_dir, modulepath)
 
   for _,module in pairs(plugins) do
     local success, plugin = pcall(require, module)

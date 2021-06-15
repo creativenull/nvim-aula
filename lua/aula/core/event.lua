@@ -10,7 +10,7 @@ local DEFAULT_AUTOCMD_ARGS = {
   nested = false
 }
 
--- Make the autocmd string to be executed with vim.cmd()
+-- Make the autocmd string to be executed with vim.api.nvim_command()
 -- which will not be part of any augroup
 --
 -- @param opts table in the format: { event (string), pattern (string), once (boolean), cmd (boolean) }
@@ -28,7 +28,7 @@ local function make_autocmd(opts)
   return string.format('autocmd! %s %s%s%s %s', opts.event, opts.pattern, once, nested, opts.cmd)
 end
 
--- Make the autocmd string to be executed with vim.cmd()
+-- Make the autocmd string to be executed with vim.api.nvim_command()
 -- as part of an augroup
 --
 -- @param opts table - in the format: { event (string), pattern (string), once (boolean), cmd (boolean) }
@@ -74,12 +74,12 @@ end
 
 -- Register all the events defined from set()
 function M.setup()
-  vim.cmd('augroup ' .. M.config.group_name)
-  vim.cmd('autocmd!')
+  vim.api.nvim_command('augroup ' .. M.config.group_name)
+  vim.api.nvim_command('autocmd!')
   for _,event in pairs(_G.aula.events.queue) do
-    vim.cmd(event.cmd)
+    vim.api.nvim_command(event.cmd)
   end
-  vim.cmd('augroup end')
+  vim.api.nvim_command('augroup end')
 end
 
 -- Define the events to be registered via init()
@@ -116,6 +116,8 @@ function M.add(opts)
   err.handle(try_fn)
 end
 
+-- Set a single independent autocmd
+-- @param opts table
 local function set_autocmd(opts)
   validate(opts)
   opts = vim.tbl_extend('force', DEFAULT_AUTOCMD_ARGS, opts)
@@ -128,7 +130,7 @@ local function set_autocmd(opts)
       nested = opts.nested,
       cmd = opts.cmd
     })
-    vim.cmd(autocmd)
+    vim.api.nvim_command(autocmd)
   elseif type(opts.cmd) == 'function' then
     local last_item = #_G.aula.events.set + 1
     local autocmd = make_autocmd({
@@ -139,19 +141,22 @@ local function set_autocmd(opts)
       cmd = string.format('lua _G.aula.events.set[%d].cb()', last_item)
     })
     table.insert(_G.aula.events.set, { cmd = autocmd, cb = opts.cmd })
-    vim.cmd(autocmd)
+    vim.api.nvim_command(autocmd)
   end
 end
 
+-- Set an independent autocmd group
+-- @param name string
+-- @param opts_list table
 function M.set_group(name, opts_list)
-  vim.cmd('augroup ' .. name)
-  vim.cmd('autocmd!')
+  vim.api.nvim_command('augroup ' .. name)
+  vim.api.nvim_command('autocmd!')
   for opts in pairs(opts_list) do
     err.handle(function()
       set_autocmd(opts)
     end)
   end
-  vim.cmd('augroup end')
+  vim.api.nvim_command('augroup end')
 end
 
 -- Set an autocmd on-demand
