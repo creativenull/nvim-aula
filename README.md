@@ -168,11 +168,9 @@ the actual autocmd (`:h :autocmd`) command within an autogroup (`:h :autogroup`)
 + `event.set_group(name, array of { event, pattern, once, cmd })` - add the event instantly but within a different
   `augroup` name. For advanced use only if you know what you are doing
 
-Between the two variations there
-
 Here are couple examples:
 
-```
+```lua
 -- When entering a lua file, set the tab spacing to 2 and use actual spaces
 event.add {
   event = 'FileType',
