@@ -27,7 +27,7 @@ colorscheme being set to default every time you hit an error while working on yo
 ## Getting Started
 
 The main goal of Aula is to provide you with proper APIs to be able to write your config in a more organized manner.
-Therefore, the folder structure is very important to note when I comes to writing your config with Aula.
+Therefore, the folder structure is very important to note when it comes to writing your config with Aula.
 
 ```
 ├── lua
@@ -43,14 +43,14 @@ Therefore, the folder structure is very important to note when I comes to writin
 
 Under `lua/aula/core` is where you will find all the Aula APIs that will be used to write your config, which will be
 done inside the `lua/aula/user` directory. Finally, `lua/aula/plugins` is where you will add your plugins as filenames,
-these files can be named with each plugin or you can group them into one file. For example, you may want to have all
-the lsp plugins into `lua/aula/plugins/lsp.lua` file, and don't need the hassle to write a `lspconfig.lua`, `compe.lua`,
-or `lsp-status.lua` for each plugin.
+these files can be named with each plugin or you can group a list of plugins into one file. For example, you may want
+to have all the LSP plugins into `lua/aula/plugins/lsp.lua` file, and don't need the hassle to write a `lspconfig.lua`,
+`compe.lua`, or `lsp-status.lua` for each plugin.
 
 Within the `user/` directory it's **REQUIRED** to have an `user/init.lua` file that will be exposed to Aula to load.
-In the `plugins/` directory there is no need to have a `plugins/init.lua` file, as the files will be automatically be
-loaded by Aula and be loaded before your `user/init.lua` is loaded. *Note:* directories inside the `plugins` directory
-will **NOT** be loaded, it's up to the files in the `plugins` directory to explicitly require them.
+In the `plugins/` directory, however, there is no need to have a `plugins/init.lua` file, as the files will be
+automatically be loaded by Aula and be loaded before your `user/init.lua` is loaded. *Note:* directories inside the
+`plugins` directory will **NOT** be loaded, it's up to the files in the `plugins` directory to explicitly require them.
 
 Let's start by taking a look at the core APIs that will be used to create your user config inside the `user` and
 `plugins` directory.
