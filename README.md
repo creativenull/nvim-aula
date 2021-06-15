@@ -9,18 +9,20 @@ this repo is setup to work in my environment, separate from the actual nvim conf
 
 ## Description
 
-Aula is a neovim distribution for nvim nightly (v0.5 and above). With the introduction of lua in nvim nightly,
-it is now possible to write plugins in a faster language, we can also leverage that in our custom nvim configuations.
+Aula is a neovim config framework for nvim nightly (v0.5 and above) built to help you create your own configuration and
+provide you with the APIs to properly setup your options, keymaps, commands etc.
 
-However, when you write lua code, you may start making syntactical or runtime mistakes which effectively stops the
-execution of lua code afterwards. This means that, if you had some keymaps (maybe to open the config file itself)
-that were set after the line where the error happens, you are now stuck with nvim with no keymaps available and
-therefore have to access your config file and other files inside your `~/.config/nvim` folder through default methods
-to fix the issue mistake.
+With the introduction of lua support in nvim nightly, it is now possible to write plugins in a faster language, we can
+also leverage that into our custom nvim configuations. However, when you write lua code, you may start making
+syntactical or runtime mistakes which effectively stops the execution of lua code afterwards. This means that, for
+example, if you had some keymaps (maybe to open the config file itself, or some telescope.nvim keymap) that were set
+after the line where the error happened, you are now stuck with nvim with no keymaps available and therefore have to
+access your config file and other files inside your `~/.config/nvim` folder through default methods to fix the issue
+mistake.
 
 Aula solves this problem by making sure that the code you write doesn't affect your config in any way possible.
 Thereby, allowing you to make mistakes and then easily fix them without you experiencing your keymaps reset or
-colorscheme being set to default every time you hit an error 🙂
+colorscheme being set to default every time you hit an error while working on you config 🙂
 
 ## Getting Started
 
