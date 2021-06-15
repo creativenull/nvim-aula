@@ -1,6 +1,12 @@
 local lspconfig = require 'lspconfig'
-local on_attach = require 'aula.plugins.lsp.hooks'.on_attach
+local on_attach = require 'aula.plugins.config.lsp.hooks'.on_attach
+local tsserver_opts = require 'aula.plugins.config.lsp.tsserver'
+local sumneko_opts = require 'aula.plugins.config.lsp.sumneko'
 
+-- Handle diagnostic langserver with this plugin
+require 'diagnosticls-nvim'.init { on_attach = on_attach }
+
+-- Default setup
 return function(name, opts)
   if lspconfig[name] == nil then
     vim.api.nvim_err_writeln(string.format('"%s" does not exist in nvim-lspconfig', name))
@@ -13,17 +19,16 @@ return function(name, opts)
   end
 
   local default_opts = {
-    on_attach = on_attach,
-    -- capabilities = lsp_status.capabilities
+    on_attach = on_attach
   }
 
   -- Extra LSP options not available in lspconfig
   -- =======
-  -- if name == 'tsserver' then
-  --   default_opts.commands = tsserver_opts.organize_cmd
-  -- elseif name == 'sumneko_lua' then
-  --   default_opts = vim.tbl_extend('force', default_opts, sumneko_opts)
-  -- end
+  if name == 'tsserver' then
+    default_opts = vim.tbl_extend('force', default_opts, tsserver_opts)
+  elseif name == 'sumneko_lua' then
+    default_opts = vim.tbl_extend('force', default_opts, sumneko_opts)
+  end
 
   -- =======
   if opts ~= nil and not vim.tbl_isempty(opts) then
