@@ -1,16 +1,11 @@
 local err = require 'aula.core.error'
 local option = require 'aula.core.option'
 local event = require 'aula.core.event'
-
-local M = {}
 local DEFAULT_OPTS = {
   background = 'dark',
   termguicolors = true
 }
-
-local function merge_with_defaults(opts)
-  return vim.tbl_extend('force', DEFAULT_OPTS, opts)
-end
+local M = {}
 
 local function validate(opts)
   assert(type(opts.name) == 'string' and opts.name ~= '', '[Aula Theme] `name` cannot be empty string')
@@ -20,7 +15,7 @@ end
 function M.set(opts)
   local themefn =  function()
     validate(opts)
-    opts = merge_with_defaults(opts)
+    opts = vim.tbl_extend('force', DEFAULT_OPTS, opts)
 
     option.set({
       background = opts.background,
@@ -43,11 +38,12 @@ end
 
 -- @param fn function of vim.cmd
 function M.set_theme_highlights(fn)
-  local hl_fn = function()
-    err.handle(fn)
-  end
-
-  event.add({ event = 'ColorScheme', cmd = hl_fn })
+  event.add({
+    event = 'ColorScheme',
+    cmd = function()
+      err.handle(fn)
+    end
+  })
 end
 
 function M.setup()

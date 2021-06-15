@@ -18,12 +18,12 @@ end
 
 local function make_rhs_queue_fn()
   local last_item = #_G.aula.keymaps.queue + 1
-  return string.format('<cmd>lua _G.aula.keymaps.queue[%d].cb()<cr>', last_item)
+  return string.format('<Cmd>lua _G.aula.keymaps.queue[%d].cb()<CR>', last_item)
 end
 
 local function make_rhs_set_fn()
   local last_item = #_G.aula.keymaps.set + 1
-  return string.format('<cmd>lua _G.aula.keymaps.set[%d].cb()<cr>', last_item)
+  return string.format('<Cmd>lua _G.aula.keymaps.set[%d].cb()<CR>', last_item)
 end
 
 -- @param mode string
