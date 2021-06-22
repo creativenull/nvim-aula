@@ -16,5 +16,7 @@ opt.set({
   lazyredraw = true,
 
   -- no mouse support
-  mouse = 'a'
+  mouse = 'a',
+
+  clipboard = 'unnamedplus'
 })
